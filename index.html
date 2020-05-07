@@ -1,0 +1,189 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoVid19 Live Tracking</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        .box {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">
+            <img src="https://static.thenounproject.com/png/2078932-200.png" width="30" height="30"
+                class="d-inline-block align-top" alt="">
+            <span class="navbar-brand mb-0 h1">CoVid19 Live Tracker</span>
+        </a>
+        <div id="dateDisplay" class="text-muted"></div>
+        <form class="form-inline ml-lg-5 my-2 my-lg-0">
+            <select name="selectCountry" id="selectCountry" class="form-control text-center">
+                <option value="-" selected>-Select Country-</option>
+            </select>
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </nav>
+    <hr>
+    <div class="container-fluid p-5">
+        <div class="row justify-content-between">
+
+            <div class="card col-12 col-lg-4 mb-3" style="width: 18rem;">
+                <img src="https://www.sentinelassam.com/wp-content/uploads/2019/09/WHO-1320x869.jpg"
+                    class="card-img-top img-fluid" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">WHO</h5>
+                    <p class="card-text">For Latest Updates & Live Press Conferences</p>
+                    <a href="https://www.who.int/emergencies/diseases/novel-coronavirus-2019" class="btn btn-primary">Go
+                        to Website</a>
+                </div>
+            </div>
+            <div class="card col-12 col-lg-4 mb-3" style="width: 18rem;">
+                <img src="https://spiderimg.itstrendingnow.com/assets/images/2020/03/27/750x506/my-gov_1585291441.jpeg"
+                    height="64%" class="card-img-top img-fluid" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">myGOV</h5>
+                    <p class="card-text">CoVid-19 State wise details in India</p>
+                    <a href="https://www.mygov.in/corona-data/covid19-statewise-status"
+                        class="btn btn-primary mb-md-3">Go to Website</a>
+                </div>
+            </div>
+            <div class="card col-12 col-lg-4 mb-3" style="width: 18rem;">
+                <img src="https://www.tri-counties.org/wp-content/uploads/2018/01/Template-Portrait-to-landscape_CDC-768x490.jpg"
+                    class="card-img-top img-fluid" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">CDC</h5>
+                    <p class="card-text">How to protect yourself from CoVid-19.</p>
+                    <a href="https://www.cdc.gov/coronavirus/2019-nCoV/index.html" class="btn btn-primary">Go to
+                        Website</a>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <h4 class="text-center text-muted"><u>Countries List</u></h4>
+        <div class="row mt-5">
+            <div class=" col-1 col-lg-3"></div>
+            <div class="col-10 col-lg-6" id="countryViewDiv">
+                <ul class="list-group" id="listUl">
+                    <!-- <div class="d-flex w-100 justify-content-between list-group-item">
+                        <h5 class="mb-1">List group item heading</h5>
+                        <a href="google.com">Hello Google!</a>
+                    </div> -->
+                </ul>
+            </div>
+            <div class="col-1 col-lg-3"></div>
+        </div>
+    </div>
+    <script>
+        var myStorage = window.localStorage;
+        var dateTimeDisplay = document.getElementById("dateDisplay");
+        var countryListArray = [];
+        var slugListArray = [];
+        window.addEventListener("load", function () {
+            displayDate();
+            displayList();
+            displayOptions();
+        });
+
+        function displayDate() {
+            dateTimeDisplay.textContent = new Date();
+        }
+
+        function displayOptions() {
+            var select = document.getElementById("selectCountry");
+            var xhrSelect = new XMLHttpRequest();
+            var categoryUrl = "https://api.covid19api.com/countries"
+            xhrSelect.open("GET", categoryUrl);
+            xhrSelect.send();
+            xhrSelect.onload = function () {
+                var response = JSON.parse(this.response);
+                // console.log(response);
+                response.sort();
+                for (var i = 0; i < response.length; i++) {
+                    // console.log(response[i])
+                    countryListArray.push(response[i].Country);
+                    slugListArray.push(response[i].Slug);
+                }
+                slugListArray.sort();
+                // console.log(slugListArray);
+                countryListArray.sort();
+                // console.log(countryListArray);
+                for (var j = 0; j < countryListArray.length; j++) {
+                    var option = document.createElement("option");
+                    // console.log(countryListArray[j])
+                    option.textContent = countryListArray[j];
+                    select.append(option);
+                }
+            }
+            // console.log(countryListArray)
+        }
+
+        function displayList() {
+            var displayUl = document.getElementById("listUl");
+            var listXhr = new XMLHttpRequest();
+            var listURL = "https://api.covid19api.com/countries"
+            listXhr.open("GET", listURL);
+            listXhr.send();
+            listXhr.onload = function () {
+                var response = JSON.parse(this.response);
+                // console.log(response);
+                response.sort(compare);
+                //sort function
+                function compare(a, b) {
+                    const var1 = a.Country.toUpperCase();
+                    const var2 = b.Country.toUpperCase();
+                    var count = 0;
+                    if (var1 > var2) {
+                        count = 1;
+                    } else {
+                        count = -1;
+                    }
+                    return count;
+                }
+                console.log(response);
+                for (var i = 0; i < response.length; i++) {
+                    var listDiv = document.createElement("div");
+                    listDiv.setAttribute("class", "list-group-item d-flex w-100 justify-content-between");
+                    var heading = document.createElement("p");
+                    heading.textContent = response[i].Country;
+                    var countryCode = response[i].ISO2; //getting Country Code
+                    // console.log(countryCode);
+                    var countryBtn = document.createElement("button");
+                    countryBtn.setAttribute("id", response[i].Slug);
+                    countryBtn.setAttribute("class", "list-group-item");
+                    countryBtn.setAttribute("name", response[i].ISO2)
+                    countryBtn.setAttribute("class", "btn btn-secondary")
+                    countryBtn.textContent = "Get Data";
+                    listDiv.append(heading, countryBtn);
+                    displayUl.append(listDiv);
+                    countryBtn.addEventListener("click", function () {
+                        nextPageFunction(this.id, this.name);
+                    });
+                }
+            }
+            //addCountryListener();
+        }
+
+        function nextPageFunction(key, cc) {
+            // var countryDiv = document.getElementById("countryViewDiv");
+            // var buttonList = document.querySelectorAll("button");
+            // console.log(buttonList);
+            // Array.from(buttonList).forEach(function(item){
+            //     // console.log(item);
+            // });
+            console.log("id is", key);
+            var jsonKey = JSON.stringify(key);
+            var jsonCc = JSON.stringify(cc);
+            myStorage.setItem("key", jsonKey);
+            myStorage.setItem("cc", jsonCc);
+            alert("Moving to next page");
+            window.location.href = "covid19CountryPage.html";
+        }
+    </script>
+</body>
+
+</html>

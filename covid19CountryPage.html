@@ -1,0 +1,128 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        .box {
+            border: 1px solid black;
+        } 
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">
+        <img src="https://static.thenounproject.com/png/2078932-200.png" width="30" height="30" class="d-inline-block align-top" alt="">
+        <span class="navbar-brand mb-0 h1"> CoVid19 Live Tracker</span>
+        </a>
+        <div id="dateDisplay" class="text-muted mr-5"></div>
+        <button class="btn btn-secondary  my-2 my-sm-0 d-block" id="homeBtn">Home</button>
+    </nav>
+    <hr>
+    <div class="row">
+        <div class="col-12">
+            <h5 id="title" class="text-center"></h5>
+        </div>
+    </div>
+    <hr>
+    <div class="row" >
+        <div class="col-2 mx-auto border" id="flagDiv"></div>
+    </div>
+    <hr>
+    <div class="row p-5 text-center">
+        <div class="col-1"></div>
+        <div class="col-10">
+            <table class="table table-responsive table-light thead-dark border">
+                <thead>
+                  <tr>
+                    <th scope="col">New Confirmed</th>
+                    <th scope="col">Total Confirmed</th>
+                    <th scope="col">New Deaths</th>
+                    <th scope="col">Total Deaths</th>
+                    <th scope="col">New Recovered</th>
+                    <th scope="col">Total Recovered</th>
+                    <th scope="col">Date</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyDisplay">
+                  
+                </tbody>
+              </table>
+        </div>
+        <div class="col-1"></div>
+    </div>
+    <script>
+        var myStorage2 = window.localStorage;
+        var dateTimeDisplay = document.getElementById("dateDisplay");
+        var key = JSON.parse(myStorage2.getItem("key"));
+        var cc = JSON.parse(myStorage2.getItem("cc"));
+        console.log("cc is",cc);
+        console.log(key);
+        window.addEventListener("load",function(){
+            var heading = document.getElementById("title");
+            var homeBtn = document.getElementById("homeBtn");
+            heading.textContent = key.toUpperCase();
+            homeBtn.addEventListener("click",takeHome);
+            displayDate()
+            displayData();
+            displayFlag(cc);
+        });
+        function displayDate(){
+            dateTimeDisplay.textContent = new Date();
+        }
+        function takeHome(){
+            window.location.href = "covid19.html";
+        }
+        function displayData(){
+            console.log("Inside Display Data Function");
+            var getArray = [];
+            var getxhr = new XMLHttpRequest();
+            var displayUrl = "https://api.covid19api.com/summary";
+            getxhr.open("GET",displayUrl);
+            getxhr.send();
+            getxhr.onload =function(){
+                var response = JSON.parse(this.response).Countries;
+                var tbody = document.getElementById("tbodyDisplay");
+                console.log(response);
+                var tr = document.createElement("tr");
+                tbody.append(tr);
+                for(var i = 0; i < response.length; i ++){
+                    // console.log(response[i]);
+                    if(response[i].Slug == key){
+                        getArray.push(response[i]);
+                        var obj = response[i];
+                        // console.log(obj);
+                        // var td = document.createElement("td");
+                        // td.textContent = response[i].
+                    }
+                }
+                for(x in obj){
+                    if(x != "CountryCode" && x != "Slug" && x != "Country"){
+                        var td = document.createElement("td");
+                        td.textContent = obj[x];
+                        td.setAttribute("class","text-center")
+                        tr.append(td);
+                    }
+                }
+            }
+        }
+        function displayFlag(code){
+            var flagxhr = new XMLHttpRequest();
+            var flagUrl = "https://restcountries.eu/rest/v2/alpha/";
+            flagxhr.open("GET",flagUrl+code);
+            flagxhr.send();
+            flagxhr.onload = function(){
+                console.log(JSON.parse(this.response).flag);
+                var flagFinalUrl = JSON.parse(this.response).flag;
+                var flagDiv = document.getElementById("flagDiv");
+                var flagImage = document.createElement("img");
+                flagImage.setAttribute("src",flagFinalUrl);
+                flagImage.setAttribute("class","img-fluid");
+                flagDiv.append(flagImage);
+            }
+        }
+    </script>
+</body>
+</html>
